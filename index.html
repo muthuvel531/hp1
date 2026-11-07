@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Gas Fuel & Cash Management System | Owner & Admin Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --hp-orange: #FF6600;
+            --hp-orange-hover: #e05a00;
+            --hp-blue: #003366;
+            --hp-dark-blue: #001f3f;
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(255, 255, 255, 0.6);
+            --shadow: 0 10px 30px rgba(0, 51, 102, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: #102a43;
+            padding: 30px 20px;
+        }
+
+        .app-container {
+            max-width: 1350px;
+            margin: 0 auto;
+        }
+
+        /* Header UI */
+        header {
+            background: linear-gradient(135deg, var(--hp-blue), var(--hp-dark-blue));
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 51, 102, 0.2);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        header h1 span {
+            color: var(--hp-orange);
+        }
+
+        header p {
+            font-size: 1.05rem;
+            opacity: 0.85;
+        }
+
+        /* Navigation Tabs UI */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            color: var(--hp-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.12);
+        }
+
+        .tab-btn.active {
+            background: var(--hp-orange);
+            color: white;
+            border-color: var(--hp-orange);
+            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.3);
+        }
+
+        /* Panel Cards UI */
+        .panel {
+            display: none;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--hp-blue);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 24px;
+            background: var(--hp-orange);
+            border-radius: 4px;
+        }
+
+        /* Form Layouts */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.92rem;
+            color: #334e68;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 1.5px solid #bcccdc;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+            background: #ffffff;
+            color: #102a43;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--hp-orange);
+            box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.15);
+        }
+
+        input[readonly] {
+            background-color: #f0f4f8;
+            color: #627d98;
+            cursor: not-allowed;
+        }
+
+        /* Denominations Section */
+        .denom-section {
+            background: rgba(240, 244, 248, 0.7);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #d9e2ec;
+        }
+
+        .denom-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--hp-blue);
+            margin-bottom: 15px;
+        }
+
+        .denom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        /* Total Display Card */
+        .total-display {
+            background: linear-gradient(135deg, var(--hp-blue), var(--hp-dark-blue));
+            color: white;
+            padding: 20px 25px;
+            border-radius: 16px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-align: right;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0, 51, 102, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-display span:first-child {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--hp-orange);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--hp-orange-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.35);
+        }
+
+        .btn-secondary {
+            background: #486581;
+            box-shadow: 0 4px 15px rgba(72, 101, 129, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: #334e68;
+        }
+
+        .btn-danger {
+            background: #e12d39;
+            box-shadow: 0 4px 15px rgba(225, 45, 57, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: #c51f2b;
+        }
+
+        .btn-success {
+            background: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        th {
+            background: var(--hp-blue);
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .clickable-name {
+            color: #0066cc;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .clickable-name:hover {
+            color: var(--hp-orange);
+            text-decoration: underline;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-success {
+            background: #def7ec;
+            color: #03543f;
+            border: 1px solid #bcf0da;
+        }
+
+        .badge-danger {
+            background: #fde8e8;
+            color: #9b1c1c;
+            border: 1px solid #fbd5d5;
+        }
+
+        .badge-warning {
+            background: #fef08a;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* Metrics Grid for Owner */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #627d98;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--hp-blue);
+        }
+
+        /* Modal UI */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(16, 42, 67, 0.6);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #829ab1;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: var(--hp-blue);
+        }
+
+        .modal-details {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-details p {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f4f8;
+            font-size: 1rem;
+        }
+
+        /* Employee profile creation */
+        .employee-profile-card {
+            background: linear-gradient(135deg, #fffaf6, #ffffff 68%);
+            border: 1px solid rgba(255, 102, 0, 0.18);
+            border-radius: 20px;
+            padding: 26px;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 24px rgba(0, 51, 102, 0.06);
+        }
+
+        .profile-card-heading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 54px;
+            height: 54px;
+            flex: 0 0 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 17px;
+            background: linear-gradient(135deg, var(--hp-orange), #ff914d);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            box-shadow: 0 7px 16px rgba(255, 102, 0, 0.2);
+        }
+
+        .profile-card-heading h3 {
+            color: var(--hp-blue);
+            font-size: 1.15rem;
+            margin-bottom: 5px;
+        }
+
+        .profile-card-heading p,
+        .profile-field-hint {
+            color: #627d98;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .employee-profile-card .form-grid {
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .employee-profile-card label {
+            color: #243b53;
+        }
+
+        .employee-profile-card input {
+            border-color: #d9e2ec;
+            border-radius: 10px;
+        }
+
+        .profile-field-hint {
+            margin-top: 7px;
+            font-size: 0.82rem;
+        }
+
+        .profile-submit-row {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 18px;
+            border-top: 1px solid #f0e5dc;
+        }
+
+        .profile-submit-row .btn {
+            min-width: 190px;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .panel {
+                padding: 28px;
+            }
+
+            .form-grid,
+            .denom-grid,
+            .metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+            }
+
+            .table-responsive {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 680px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 14px 10px;
+            }
+
+            header {
+                padding: 24px 16px;
+                margin-bottom: 20px;
+                border-radius: 16px;
+            }
+
+            header h1 {
+                font-size: clamp(1.55rem, 7vw, 2rem);
+                line-height: 1.2;
+            }
+
+            header p {
+                font-size: 0.92rem;
+                line-height: 1.5;
+            }
+
+            .nav-tabs {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .tab-btn {
+                justify-content: center;
+                padding: 11px 6px;
+                border-radius: 12px;
+                font-size: 0.82rem;
+                line-height: 1.25;
+                text-align: center;
+            }
+
+            .panel {
+                padding: 20px 14px;
+                margin-bottom: 20px;
+                border-radius: 18px;
+            }
+
+            h2 {
+                align-items: flex-start;
+                gap: 9px;
+                margin-bottom: 20px;
+                font-size: 1.2rem;
+                line-height: 1.4;
+            }
+
+            h2::before {
+                flex: 0 0 5px;
+                height: 22px;
+                margin-top: 2px;
+            }
+
+            .form-grid,
+            .denom-grid,
+            .metrics-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 16px;
+            }
+
+            .form-grid {
+                margin-bottom: 20px;
+            }
+
+            input,
+            select {
+                min-width: 0;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .denom-section {
+                padding: 16px 12px;
+                border-radius: 14px;
+            }
+
+            .total-display {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+                padding: 18px;
+                font-size: 1.25rem;
+                text-align: left;
+            }
+
+            .total-display span:first-child {
+                font-size: 0.92rem;
+            }
+
+            .panel > form > .btn,
+            .form-group > .btn {
+                width: 100%;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-bar .btn {
+                width: 100%;
+            }
+
+            .table-responsive {
+                margin-top: 16px;
+                border-radius: 12px;
+            }
+
+            table {
+                min-width: 700px;
+                font-size: 0.88rem;
+            }
+
+            th,
+            td {
+                padding: 12px 14px;
+                white-space: nowrap;
+            }
+
+            .metric-card {
+                padding: 17px;
+            }
+
+            .modal {
+                padding: 14px;
+            }
+
+            .modal-content {
+                width: 100%;
+                max-height: calc(100vh - 28px);
+                overflow-y: auto;
+                padding: 26px 18px;
+                border-radius: 18px;
+            }
+
+            .close-btn {
+                top: 14px;
+                right: 17px;
+            }
+
+            .modal-details p {
+                gap: 12px;
+                font-size: 0.9rem;
+            }
+
+            .employee-profile-card {
+                padding: 20px 16px;
+            }
+
+            .profile-card-heading {
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .profile-avatar {
+                width: 46px;
+                height: 46px;
+                flex-basis: 46px;
+                border-radius: 14px;
+            }
+
+            .profile-submit-row .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .nav-tabs {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-btn {
+                justify-content: flex-start;
+                padding: 12px 16px;
+                text-align: left;
+            }
+        }
+
+        @media (hover: none) {
+            .tab-btn:hover,
+            .btn:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>HP Gas <span>Management System</span></h1>
+        <p>Enterprise Multi-Pump, Admin Verification & Owner Financial Portal</p>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('user')">User Panel (Pumps)</button>
+        <button class="tab-btn" onclick="switchTab('admin')">Admin Panel</button>
+        <button class="tab-btn" onclick="switchTab('owner')">Owner Panel</button>
+    </div>
+
+    <!-- USER PANEL -->
+    <div id="user-panel" class="panel active">
+        <h2>Employee & Pump Cash Submission</h2>
+        <form id="submission-form" onsubmit="handleSubmission(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="pump-select">Select Pump & Employee</label>
+                    <select id="pump-select" required onchange="updateEmployeeInfo()">
+                        <option value="">-- Choose Pump --</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="user-id">User Unique ID</label>
+                    <input type="text" id="user-id" placeholder="e.g. HP_EMP001" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-name">Employee Name</label>
+                    <input type="text" id="user-name" placeholder="Auto-populated by pump" readonly required>
+                </div>
+            </div>
+
+            <div class="denom-section">
+                <div class="denom-title">Cash Denomination Breakdown</div>
+                <div class="denom-grid">
+                    <div class="form-group">
+                        <label>₹500 Notes</label>
+                        <input type="number" id="d500" min="0" value="0" oninput="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>₹100 Notes</label>
+                        <input type="number" id="d100" min="0" value="0" oninput="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>₹10 Notes</label>
+                        <input type="number" id="d10" min="0" value="0" oninput="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>₹5 Notes / Coins</label>
+                        <input type="number" id="d5" min="0" value="0" oninput="calculateTotal()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-display">
+                <span>Total Collection Amount</span>
+                <span id="total-display-amount">₹0.00</span>
+            </div>
+
+            <button type="submit" class="btn">Submit Collection</button>
+        </form>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-panel" class="panel">
+        <h2>Admin Management & Meter Verification</h2>
+        
+        <div class="denom-section" style="background: rgba(0, 51, 102, 0.04); border: 1px solid rgba(0, 51, 102, 0.12);">
+            <div class="denom-title" style="color: var(--hp-blue);">Meter Reading vs Cash Verification</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="verify-pump">Select Pump to Verify</label>
+                    <select id="verify-pump">
+                        <option value="">-- Choose Pump --</option>
+                        <option value="Pump 1">Pump 1</option>
+                        <option value="Pump 2">Pump 2</option>
+                        <option value="Pump 3">Pump 3</option>
+                        <option value="Pump 4">Pump 4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reading-amount">Meter Reading Expected Amount (₹)</label>
+                    <input type="number" id="reading-amount" placeholder="Enter meter sales amount" step="0.01">
+                </div>
+                <div class="form-group" style="justify-content: flex-end;">
+                    <button type="button" class="btn" onclick="verifyReading()">Verify Reading</button>
+                </div>
+            </div>
+            <div id="verification-result" style="margin-top: 15px; font-weight: 600; font-size: 1.05rem;"></div>
+        </div>
+
+        <h3 style="color: var(--hp-blue); margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem;">All Pump Submissions & Records</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pump</th>
+                        <th>User ID</th>
+                        <th>Employee Name</th>
+                        <th>Total Amount (₹)</th>
+                        <th>Timestamp</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn" onclick="downloadCSV()">Download Excel (CSV)</button>
+            <button class="btn btn-secondary" onclick="downloadPDF()">Download PDF Report</button>
+            <button class="btn btn-danger" onclick="clearData()">Clear All Records</button>
+        </div>
+    </div>
+
+    <!-- OWNER PANEL -->
+    <div id="owner-panel" class="panel">
+        <h2>Owner Financial & Employee Management Portal</h2>
+        
+        <!-- Add New Employee & Tag Section -->
+        <div class="employee-profile-card">
+            <div class="profile-card-heading">
+                <div class="profile-avatar" aria-hidden="true">EP</div>
+                <div>
+                    <h3>Create employee profile</h3>
+                    <p>Add the employee’s pump assignment and unique tag to their profile.</p>
+                </div>
+            </div>
+            <form onsubmit="handleAddNewEmployee(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="new-pump">Pump Name / Number</label>
+                        <input type="text" id="new-pump" placeholder="e.g. Pump 5" required>
+                        <span class="profile-field-hint">Enter the pump this employee will work on.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-emp-name">Employee Name</label>
+                        <input type="text" id="new-emp-name" placeholder="e.g. Murugan" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-tag">Unique Employee Tag / Role</label>
+                        <input type="text" id="new-tag" placeholder="e.g. TAG_PUMP5_SENIOR" required>
+                        <span class="profile-field-hint">Use a unique tag to identify the employee.</span>
+                    </div>
+                </div>
+                <div class="profile-submit-row">
+                    <button type="submit" class="btn">Save employee profile</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="metrics-grid" style="margin-top: 25px;">
+            <div class="metric-card">
+                <span class="metric-title">Employee Total Collection</span>
+                <span class="metric-value" id="owner-emp-total">₹0.00</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-title">Admin Verified Total</span>
+                <span class="metric-value" id="owner-admin-total">₹0.00</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-title">Total Tax & Charges (GST/SI)</span>
+                <span class="metric-value" id="owner-tax-total">₹0.00</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-title">Settled / Pending Pay</span>
+                <span class="metric-value" id="owner-settlement-status" style="font-size: 1.2rem;">Pending</span>
+            </div>
+        </div>
+
+        <!-- Tax & Statutory Breakdown Section -->
+        <h3 style="color: var(--hp-blue); margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem;">Tax, Cash Tag & SI Breakdown</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tax / Charge Component</th>
+                        <th>Rate / Formula</th>
+                        <th>Applicable Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody id="tax-table-body">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Employee Payment & Settlement Bench -->
+        <h3 style="color: var(--hp-blue); margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem;">Employee Payment & Bench Settlement Tracker</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pump & Tag</th>
+                        <th>Employee Name</th>
+                        <th>Collected Total (₹)</th>
+                        <th>Payment Status</th>
+                        <th>Action / Pay Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="owner-settlement-body">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="details-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 style="margin-bottom: 5px; border-bottom: none;">Employee Submission Details</h2>
+        <div class="modal-details" id="modal-details-body"></div>
+    </div>
+</div>
+
+<script>
+    // Persistent initial setup
+    let submissions = JSON.parse(localStorage.getItem('hp_gas_submissions')) || [];
+    let employees = JSON.parse(localStorage.getItem('hp_gas_employees')) || [
+        { pump: 'Pump 1', name: 'Anand', tag: 'TAG_P1_ANAND' },
+        { pump: 'Pump 2', name: 'Dinesh', tag: 'TAG_P2_DINESH' },
+        { pump: 'Pump 3', name: 'Karthik', tag: 'TAG_P3_KARTHIK' },
+        { pump: 'Pump 4', name: 'Ramesh', tag: 'TAG_P4_RAMESH' }
+    ];
+    let payments = JSON.parse(localStorage.getItem('hp_gas_payments')) || {};
+
+    function initApp() {
+        populatePumpDropdowns();
+    }
+
+    function populatePumpDropdowns() {
+        const select = document.getElementById('pump-select');
+        select.innerHTML = '<option value="">-- Choose Pump --</option>';
+        employees.forEach(emp => {
+            const opt = document.createElement('option');
+            opt.value = emp.pump;
+            opt.setAttribute('data-emp', emp.name);
+            opt.setAttribute('data-tag', emp.tag);
+            opt.textContent = `${emp.pump} - ${emp.name} (${emp.tag})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+        if (tab === 'user') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('user-panel').classList.add('active');
+        } else if (tab === 'admin') {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('admin-panel').classList.add('active');
+            renderTable();
+        } else if (tab === 'owner') {
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            document.getElementById('owner-panel').classList.add('active');
+            renderOwnerPanel();
+        }
+    }
+
+    function updateEmployeeInfo() {
+        const select = document.getElementById('pump-select');
+        const selectedOption = select.options[select.selectedIndex];
+        const empName = selectedOption.getAttribute('data-emp') || '';
+        document.getElementById('user-name').value = empName;
+    }
+
+    function calculateTotal() {
+        const d500 = parseInt(document.getElementById('d500').value) || 0;
+        const d100 = parseInt(document.getElementById('d100').value) || 0;
+        const d10 = parseInt(document.getElementById('d10').value) || 0;
+        const d5 = parseInt(document.getElementById('d5').value) || 0;
+
+        const total = (d500 * 500) + (d100 * 100) + (d10 * 10) + (d5 * 5);
+        document.getElementById('total-display-amount').innerText = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        return total;
+    }
+
+    function handleSubmission(event) {
+        event.preventDefault();
+        
+        const pump = document.getElementById('pump-select').value;
+        const userId = document.getElementById('user-id').value.trim();
+        const userName = document.getElementById('user-name').value.trim();
+        const d500 = parseInt(document.getElementById('d500').value) || 0;
+        const d100 = parseInt(document.getElementById('d100').value) || 0;
+        const d10 = parseInt(document.getElementById('d10').value) || 0;
+        const d5 = parseInt(document.getElementById('d5').value) || 0;
+        const total = calculateTotal();
+
+        if (!pump || !userId || !userName) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        const record = {
+            id: 'REC_' + Date.now(),
+            pump,
+            userId,
+            userName,
+            d500,
+            d100,
+            d10,
+            d5,
+            total,
+            timestamp: new Date().toLocaleString()
+        };
+
+        submissions.push(record);
+        localStorage.setItem('hp_gas_submissions', JSON.stringify(submissions));
+
+        alert('Cash submission recorded successfully!');
+        document.getElementById('submission-form').reset();
+        document.getElementById('total-display-amount').innerText = '₹0.00';
+    }
+
+    function handleAddNewEmployee(event) {
+        event.preventDefault();
+        const pump = document.getElementById('new-pump').value.trim();
+        const name = document.getElementById('new-emp-name').value.trim();
+        const tag = document.getElementById('new-tag').value.trim();
+
+        if (!pump || !name || !tag) return;
+
+        employees.push({ pump, name, tag });
+        localStorage.setItem('hp_gas_employees', JSON.stringify(employees));
+        populatePumpDropdowns();
+        alert(`New Employee ${name} added successfully with tag ${tag}!`);
+        event.target.reset();
+        renderOwnerPanel();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        if (submissions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #829ab1; padding: 30px;">No collection records found.</td></tr>`;
+            return;
+        }
+
+        submissions.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.pump}</strong></td>
+                <td>${item.userId}</td>
+                <td><span class="clickable-name" onclick="showDetails(${index})">${item.userName}</span></td>
+                <td>₹${item.total.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+                <td>${item.timestamp}</td>
+                <td>
+                    <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.85rem;" onclick="deleteRecord(${index})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderOwnerPanel() {
+        const totalEmpCollection = submissions.reduce((sum, item) => sum + item.total, 0);
+        
+        document.getElementById('owner-emp-total').innerText = `₹${totalEmpCollection.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById('owner-admin-total').innerText = `₹${totalEmpCollection.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+        // Tax Calculations (GST 5%, SI 2%, Cash Tag 1%)
+        const gst = totalEmpCollection * 0.05;
+        const si = totalEmpCollection * 0.02;
+        const cashTag = totalEmpCollection * 0.01;
+        const totalTax = gst + si + cashTag;
+
+        document.getElementById('owner-tax-total').innerText = `₹${totalTax.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+        // Tax Table
+        const taxBody = document.getElementById('tax-table-body');
+        taxBody.innerHTML = `
+            <tr><td><strong>GST (Goods & Services Tax)</strong></td><td>5.0% on Fuel/Sales</td><td>₹${gst.toFixed(2)}</td></tr>
+            <tr><td><strong>SI (Statutory Incentive)</strong></td><td>2.0% allocation</td><td>₹${si.toFixed(2)}</td></tr>
+            <tr><td><strong>Cash Tag Charge</strong></td><td>1.0% handling fee</td><td>₹${cashTag.toFixed(2)}</td></tr>
+            <tr style="background: #f0f4f8;"><td><strong>Total Deductions & Taxes</strong></td><td><strong>Sum</strong></td><td><strong>₹${totalTax.toFixed(2)}</strong></td></tr>
+        `;
+
+        // Settlement Tracker Table
+        const settleBody = document.getElementById('owner-settlement-body');
+        settleBody.innerHTML = '';
+
+        let allPaid = true;
+
+        employees.forEach(emp => {
+            const empTotal = submissions
+                .filter(item => item.pump === emp.pump)
+                .reduce((sum, item) => sum + item.total, 0);
+
+            const isPaid = payments[emp.pump] || false;
+            if (!isPaid && empTotal > 0) allPaid = false;
+
+            settleBody.innerHTML += `
+                <tr>
+                    <td><strong>${emp.pump}</strong> (${emp.tag})</td>
+                    <td>${emp.name}</td>
+                    <td>₹${empTotal.toLocaleString('en-IN')}</td>
+                    <td><span class="badge ${isPaid ? 'badge-success' : 'badge-warning'}">${isPaid ? 'Paid' : 'Pending / Bench'}</span></td>
+                    <td>
+                        <button class="btn ${isPaid ? 'btn-secondary' : 'btn-success'}" style="padding: 6px 14px; font-size: 0.85rem;" onclick="togglePayment('${emp.pump}')">
+                            ${isPaid ? 'Mark Unpaid' : 'Mark as Paid'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('owner-settlement-status').innerText = allPaid ? 'All Settled' : 'Pending Action';
+        document.getElementById('owner-settlement-status').style.color = allPaid ? '#10b981' : '#f59e0b';
+    }
+
+    function togglePayment(pump) {
+        payments[pump] = !payments[pump];
+        localStorage.setItem('hp_gas_payments', JSON.stringify(payments));
+        renderOwnerPanel();
+    }
+
+    function showDetails(index) {
+        const item = submissions[index];
+        const modalBody = document.getElementById('modal-details-body');
+        modalBody.innerHTML = `
+            <p><strong>Pump:</strong> <span>${item.pump}</span></p>
+            <p><strong>User ID:</strong> <span>${item.userId}</span></p>
+            <p><strong>Employee Name:</strong> <span>${item.userName}</span></p>
+            <p><strong>₹500 Notes:</strong> <span>${item.d500} (₹${item.d500 * 500})</span></p>
+            <p><strong>₹100 Notes:</strong> <span>${item.d100} (₹${item.d100 * 100})</span></p>
+            <p><strong>₹10 Notes:</strong> <span>${item.d10} (₹${item.d10 * 10})</span></p>
+            <p><strong>₹5 Notes/Coins:</strong> <span>${item.d5} (₹${item.d5 * 5})</span></p>
+            <p><strong>Total Collection:</strong> <strong style="color:var(--hp-orange);">₹${item.total.toLocaleString('en-IN', {minimumFractionDigits: 2})}</strong></p>
+            <p><strong>Timestamp:</strong> <span>${item.timestamp}</span></p>
+        `;
+        document.getElementById('details-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('details-modal').style.display = 'none';
+    }
+
+    function deleteRecord(index) {
+        if (confirm('Are you sure you want to delete this record?')) {
+            submissions.splice(index, 1);
+            localStorage.setItem('hp_gas_submissions', JSON.stringify(submissions));
+            renderTable();
+        }
+    }
+
+    function clearData() {
+        if (confirm('Are you sure you want to clear all submission records?')) {
+            submissions = [];
+            localStorage.removeItem('hp_gas_submissions');
+            renderTable();
+        }
+    }
+
+    function verifyReading() {
+        const pump = document.getElementById('verify-pump').value;
+        const readingAmount = parseFloat(document.getElementById('reading-amount').value);
+
+        if (!pump || isNaN(readingAmount)) {
+            alert('Please select a pump and enter a valid meter reading amount.');
+            return;
+        }
+
+        const pumpTotal = submissions
+            .filter(item => item.pump === pump)
+            .reduce((sum, item) => sum + item.total, 0);
+
+        const diff = Math.abs(pumpTotal - readingAmount);
+        const resultDiv = document.getElementById('verification-result');
+
+        if (diff < 0.01) {
+            resultDiv.innerHTML = `<span class="badge badge-success">✓ Equal / Match</span> Pump collection (₹${pumpTotal.toLocaleString('en-IN')}) perfectly matches Meter Reading (₹${readingAmount.toLocaleString('en-IN')}).`;
+        } else {
+            resultDiv.innerHTML = `<span class="badge badge-danger">✗ Not Equal</span> Pump collection (₹${pumpTotal.toLocaleString('en-IN')}) differs from Meter Reading (₹${readingAmount.toLocaleString('en-IN')}) by ₹${diff.toLocaleString('en-IN')}.`;
+        }
+    }
+
+    function downloadCSV() {
+        if (submissions.length === 0) {
+            alert('No records available to export.');
+            return;
+        }
+
+        let csv = 'Pump,User ID,Employee Name,500s,100s,10s,5s,Total Amount,Timestamp\n';
+        submissions.forEach(item => {
+            csv += `"${item.pump}","${item.userId}","${item.userName}",${item.d500},${item.d100},${item.d10},${item.d5},${item.total},"${item.timestamp}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'hp_gas_cash_report.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function downloadPDF() {
+        if (submissions.length === 0) {
+            alert('No records available to export.');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.setTextColor(0, 51, 102);
+        doc.text('HP Gas Management & Owner Report', 14, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+
+        let y = 38;
+        doc.setFontSize(11);
+        doc.setFillColor(0, 51, 102);
+        doc.rect(14, y, 182, 9, 'F');
+        doc.setTextColor(255);
+        doc.text('Pump', 16, y + 6);
+        doc.text('User ID', 55, y + 6);
+        doc.text('Employee', 90, y + 6);
+        doc.text('Total (₹)', 150, y + 6);
+
+        y += 14;
+        doc.setTextColor(0);
+        submissions.forEach(item => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+            doc.text(item.pump, 16, y);
+            doc.text(item.userId, 55, y);
+            doc.text(item.userName, 90, y);
+            doc.text(`₹${item.total.toLocaleString('en-IN')}`, 150, y);
+            y += 10;
+        });
+
+        doc.save('hp_gas_owner_report.pdf');
+    }
+
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
